@@ -1,0 +1,10 @@
+language: csharp
+dist: trusty
+sudo: required
+mono: none
+dotnet: 1.0.0-preview2-003121
+
+script:
+  - dotnet restore
+  - dotnet build -c Release **/project.json
+  - dotnet publish -c Release
