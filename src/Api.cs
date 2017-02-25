@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Net;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
@@ -179,7 +178,8 @@ namespace Kraken
         /// </summary>
         /// <param name="method">The API method to call</param>
         /// <param name="parameters">All parameters as key value pairs</param>
-        /// <returns>The raw result string (probably a json string)</returns>
+        /// <returns>The raw result string (probably a json string)</returns> 
+        /// <exception cref="KrakenException">If there was an error in the result json</exception>
         public async Task<String> QueryPublicAsync(String method, Dictionary<String, String> parameters)
         {
             string postData = String.Empty;
@@ -201,7 +201,13 @@ namespace Kraken
 
                 var response = await client.PostAsync(address, content);
 
-                return await response.Content.ReadAsStringAsync();
+                string json = await response.Content.ReadAsStringAsync();
+                var errors = GetErrorsFromJson(json);
+
+                if (errors.Find(e => e.SeverityCode == Error.Severity.Error) != null)
+                    throw new KrakenException(errors);
+
+                return json;
             }
         }
 
@@ -210,7 +216,8 @@ namespace Kraken
         /// </summary>
         /// <param name="method">The API method to call</param>
         /// <param name="parameters">All parameters for this method</param>
-        /// <returns>The raw result string (probably a json string)</returns>
+        /// <returns>The raw result string (probably a json string)</returns> 
+        /// <exception cref="KrakenException">If there was an error in the result json</exception>
         public async Task<String> QueryPrivateAsync(String method, Dictionary<String, String> parameters)
         {
             // If there are no parameters, create a new Dictionary
@@ -245,7 +252,13 @@ namespace Kraken
 
                 var response = await client.PostAsync(address, content);
 
-                return await response.Content.ReadAsStringAsync();
+                string json = await response.Content.ReadAsStringAsync();
+                var errors = GetErrorsFromJson(json);
+
+                if (errors.Find(e => e.SeverityCode == Error.Severity.Error) != null)
+                    throw new KrakenException(errors);
+
+                return json;
             }
         }
 
@@ -333,6 +346,30 @@ namespace Kraken
                 byte[] sign = sha512.ComputeHash(sigBytes);
                 return Convert.ToBase64String(sign);
             }
+        }
+
+        /// <summary>
+        /// Get a list of errors, if there are errors in the given json
+        /// </summary>
+        /// <param name="json">The json response from the Kraken API</param>
+        /// <returns>A list of errors</returns>
+        private List<Error> GetErrorsFromJson(String json)
+        {
+            var list = new List<Error>();
+            if (String.IsNullOrWhiteSpace(json))
+                return list;
+
+            JObject jObj = JObject.Parse(json);
+            JToken token = jObj.SelectToken("error");
+
+            foreach (JToken eToken in token.Children())
+            {
+                var errorText = (string) eToken;
+                if (!String.IsNullOrWhiteSpace(errorText))
+                    list.Add(new Error(errorText));
+            }
+
+            return list;
         }
 
         #endregion private / protected
