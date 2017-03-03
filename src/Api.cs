@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
@@ -45,6 +46,8 @@ namespace Kraken
         /// </summary>
         protected String _version;
 
+        private Cache _cache;
+
         #region Constructors
 
         /// <summary>
@@ -77,6 +80,8 @@ namespace Kraken
             _secret = secret;
             _url = url;
             _version = version;
+
+            _cache = new Cache(this, true);
         }
 
         #endregion Constructors
@@ -90,15 +95,38 @@ namespace Kraken
         /// <summary>
         /// Get asset info
         /// </summary>
+        /// <returns>A list with all assets</returns>
+        public async Task<IList<Asset>> GetAssetsAsync()
+        {
+            return await GetAssetsAsync(null);
+        }
+
+        /// <summary>
+        /// Get asset info
+        /// </summary>
         /// <param name="asset">comma delimited list of assets to get info on</param>
         /// <returns>A list with the requested assets</returns>
         public async Task<IList<Asset>> GetAssetsAsync(String asset)
         {
-            var parameters = new Dictionary<String, String>();
-            if (!String.IsNullOrWhiteSpace(asset))
-                parameters.Add("asset", asset);
+            IList<Asset> assets = await _cache.GetAssetsAsync();
 
-            string json = await QueryPublicAsync("Assets", parameters);
+            if (!String.IsNullOrWhiteSpace(asset))
+            {
+                string[] assetNames = asset.Split(',');
+
+                assets = assets.Where(a => assetNames.Contains(a.Name)).ToList();
+            }
+
+            return assets;
+        }
+
+        /// <summary>
+        /// Get a fresh, not cached version of all assets
+        /// </summary>
+        /// <returns>A list with all assets</returns>
+        internal async Task<IList<Asset>> GetNoCacheAssetsAsync()
+        {
+            string json = await QueryPublicAsync("Assets", new Dictionary<String, String>());
 
             JObject jObj = JObject.Parse(json);
             JEnumerable<JToken> results = jObj["result"].Children();
@@ -111,6 +139,108 @@ namespace Kraken
             }
 
             return assets;
+        }
+
+        /// <summary>
+        /// Get all available asset pairs
+        /// </summary>
+        /// <returns>A list with all asset pairs</returns>
+        public async Task<IList<AssetPair>> GetAssertPairsAsync()
+        {
+            return await GetAssertPairsAsync(InfoLevel.All);
+        }
+
+        /// <summary>
+        /// Get the requested info for all available asset pairs
+        /// </summary>
+        /// <param name="level">The InfoLevel</param>
+        /// <returns>A list with all asset pairs</returns>
+        public async Task<IList<AssetPair>> GetAssertPairsAsync(InfoLevel level)
+        {
+            return await GetAssertPairsAsync(null, level);
+        }
+
+        /// <summary>
+        /// Get a list of the requested asset pairs
+        /// </summary>
+        /// <param name="pairs">A comma separated list of asset pairs (e.g. XBTEUR for Bitcoin-Euro)</param>
+        /// <returns>A list of the requested asset pairs</returns>
+        public async Task<IList<AssetPair>> GetAssertPairsAsync(String pairs)
+        {
+            return await GetAssertPairsAsync(pairs, InfoLevel.All);
+        }
+
+        /// <summary>
+        /// Get the requested info for the list of the requested asset pairs
+        /// </summary>
+        /// <param name="pairs">A comma separated list of asset pairs (e.g. XBTEUR for Bitcoin-Euro)</param>
+        /// <param name="level">The InfoLevel</param>
+        /// <returns>A list with the requested pairs</returns>
+        public async Task<IList<AssetPair>> GetAssertPairsAsync(String pairs, InfoLevel level)
+        {
+            if (level != InfoLevel.All)
+                return await GetNoCacheAssetPairsAsync(pairs, level);
+
+            IList<AssetPair> assetPairs = await _cache.GetAssetPairsAsync();
+
+            if (!String.IsNullOrWhiteSpace(pairs))
+            {
+                string[] pairNames = pairs.Split(',');
+                
+                assetPairs = assetPairs.Where(a => pairNames.Contains(a.Name)).ToList();
+            }
+
+            return assetPairs;
+        }
+
+        /// <summary>
+        /// Get a fresh, not cached list of asset pairs
+        /// </summary>
+        /// <param name="pairs">A comma separated list of asset pairs (e.g. XBTEUR for Bitcoin-Euro)</param>
+        /// <param name="level">The InfoLevel</param>
+        /// <returns>A list with the requested pairs</returns>
+        internal async Task<IList<AssetPair>> GetNoCacheAssetPairsAsync(String pairs, InfoLevel level)
+        {
+            var parameters = new Dictionary<String, String>();
+
+            switch (level)
+            {
+                case InfoLevel.Fees:
+                    parameters.Add("info", "fees");
+                    break;
+                case InfoLevel.Leverage:
+                    parameters.Add("info", "leverage");
+                    break;
+                case InfoLevel.Margin:
+                    parameters.Add("info", "margin");
+                    break;
+                case InfoLevel.All:
+                default:
+                    parameters.Add("info", "info");
+                    break;
+            }
+
+            var json = await QueryPublicAsync("AssetPairs", parameters);
+
+            JObject jObj = JObject.Parse(json);
+            JEnumerable<JToken> results = jObj["result"].Children();
+
+            IList<Asset> assets = await GetAssetsAsync();
+            IList<AssetPair> assetPairs = new List<AssetPair>();
+            foreach (JToken token in results)
+            {
+                AssetPair a = JsonConvert.DeserializeObject<AssetPair>(token.First.ToString());
+                
+                if (!String.IsNullOrWhiteSpace(a.BaseAlias) && a.BaseAlias.Length > 1)
+                    a.Base = assets.Where(o => o.Name.Equals(a.BaseAlias.Substring(1))).FirstOrDefault();
+
+                if (!String.IsNullOrWhiteSpace(a.QuoteAlias) && a.QuoteAlias.Length > 1)
+                    a.Quote = assets.Where(o => o.Name.Equals(a.QuoteAlias.Substring(1))).FirstOrDefault();
+
+                assetPairs.Add(a);
+            }
+
+            return assetPairs;
         }
 
         /// <summary>
