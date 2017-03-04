@@ -46,6 +46,8 @@ namespace Kraken
         /// </summary>
         protected String _version;
 
+        protected HttpMessageHandler _clientHandler;
+
         private Cache _cache;
 
         #region Constructors
@@ -74,12 +76,24 @@ namespace Kraken
         /// <param name="secret">The API secret</param>
         /// <param name="url">A custom API url</param>
         /// <param name="version">A custom API version</param>
-        public Api(String key, String secret, String url, String version)
+        public Api(String key, String secret, String url, String version) : this(key, secret, url, version, null)
+        {}
+
+        /// <summary>
+        /// Create a new instance with the given key and secret, and a custom url and version
+        /// </summary>
+        /// <param name="key">The API key</param>
+        /// <param name="secret">The API secret</param>
+        /// <param name="url">A custom API url</param>
+        /// <param name="version">A custom API version</param>
+        /// <param name="clientHandler">a custom http client handler</param>
+        public Api(String key, String secret, String url, String version, HttpMessageHandler clientHandler)
         {
             _key = key;
             _secret = secret;
             _url = url;
             _version = version;
+            _clientHandler = clientHandler;
 
             _cache = new Cache(this, true);
         }
@@ -324,7 +338,7 @@ namespace Kraken
                 postData = postData.Substring(1);
             }
 
-            using (var client = new HttpClient())
+            using (var client = _clientHandler == null ?  new HttpClient() : new HttpClient(_clientHandler))
             {
                 string address = String.Format("{0}/{1}/public/{2}", _url, _version, method);
                 var content = new StringContent(postData, Encoding.UTF8, MediaType);
@@ -372,7 +386,7 @@ namespace Kraken
             string path = String.Format("/{0}/private/{1}", _version, method);
             string signature = CreateSignature(path, parameters["nonce"], postData);
 
-            using (var client = new HttpClient())
+            using (var client = _clientHandler == null ?  new HttpClient() : new HttpClient(_clientHandler))
             {
                 client.DefaultRequestHeaders.Add("API-Key", _key);
                 client.DefaultRequestHeaders.Add("API-Sign", signature);

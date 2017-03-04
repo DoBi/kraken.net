@@ -1,4 +1,10 @@
 {
+  "authors": [
+    "Dominik Bittner"
+  ],
+  "name": "kraken.net",
+  "copyright": "Copyright (c) 2017, Dominik Bittner",
+  "licenseUrl": "https://github.com/DoBi/kraken.net/blob/master/LICENSE",
   "version": "0.0.1",
   "buildOptions": {
     "debugType": "portable"
