@@ -38,15 +38,6 @@ namespace Kraken.Tests
                     Content = new StringContent(File.ReadAllText("Responses/ServerTime.json"))
                 }
             );
-            
-            handler.AddResponse(
-                new Uri(String.Format("{0}/{1}/public/{2}", Api.Url, Api.Version, "Tim")),
-                String.Empty,
-                new HttpResponseMessage(HttpStatusCode.OK)
-                {
-                    Content = new StringContent(File.ReadAllText("Responses/ErrorGeneral.json"))
-                }
-            );
         }
 
         [Fact]
@@ -57,6 +48,25 @@ namespace Kraken.Tests
             Assert.True(assets.Count > 0);
 
             Assert.Contains(assets, a => a.Name.Equals("EUR"));
+        }
+
+        [Fact]
+        public void TestGetAssetsCache()
+        {
+            var assets1 = _api.GetAssets(null);
+            var assets2 = _api.GetAssets(null);
+
+            Assert.Same(assets1, assets2);
+        }
+
+        [Fact]
+        // TODO: Currently not enabled because there are no json response for asset pairs
+        public void TestGetAssetPairsCache()
+        {
+            var assetPairs1 = _api.GetAssetPairs();
+            var assetPairs2 = _api.GetAssetPairs();
+
+            Assert.Same(assetPairs1, assetPairs2);
         }
 
         [Fact]

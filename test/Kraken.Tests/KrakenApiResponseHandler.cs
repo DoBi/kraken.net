@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -33,7 +34,10 @@ namespace Kraken.Tests
                 return _responses[key];
             else
             {
-                return new HttpResponseMessage(HttpStatusCode.NotFound) { RequestMessage = request };
+                return new HttpResponseMessage(HttpStatusCode.OK)
+                {
+                    Content = new StringContent(File.ReadAllText("Responses/UnknownMethod.json"))
+                };
             }
         }
     }

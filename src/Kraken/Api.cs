@@ -159,9 +159,9 @@ namespace Kraken
         /// Get all available asset pairs
         /// </summary>
         /// <returns>A list with all asset pairs</returns>
-        public async Task<IList<AssetPair>> GetAssertPairsAsync()
+        public async Task<IList<AssetPair>> GetAssetPairsAsync()
         {
-            return await GetAssertPairsAsync(InfoLevel.All);
+            return await GetAssetPairsAsync(InfoLevel.All);
         }
 
         /// <summary>
@@ -169,9 +169,9 @@ namespace Kraken
         /// </summary>
         /// <param name="level">The InfoLevel</param>
         /// <returns>A list with all asset pairs</returns>
-        public async Task<IList<AssetPair>> GetAssertPairsAsync(InfoLevel level)
+        public async Task<IList<AssetPair>> GetAssetPairsAsync(InfoLevel level)
         {
-            return await GetAssertPairsAsync(null, level);
+            return await GetAssetPairsAsync(null, level);
         }
 
         /// <summary>
@@ -179,9 +179,9 @@ namespace Kraken
         /// </summary>
         /// <param name="pairs">A comma separated list of asset pairs (e.g. XBTEUR for Bitcoin-Euro)</param>
         /// <returns>A list of the requested asset pairs</returns>
-        public async Task<IList<AssetPair>> GetAssertPairsAsync(String pairs)
+        public async Task<IList<AssetPair>> GetAssetPairsAsync(String pairs)
         {
-            return await GetAssertPairsAsync(pairs, InfoLevel.All);
+            return await GetAssetPairsAsync(pairs, InfoLevel.All);
         }
 
         /// <summary>
@@ -190,7 +190,7 @@ namespace Kraken
         /// <param name="pairs">A comma separated list of asset pairs (e.g. XBTEUR for Bitcoin-Euro)</param>
         /// <param name="level">The InfoLevel</param>
         /// <returns>A list with the requested pairs</returns>
-        public async Task<IList<AssetPair>> GetAssertPairsAsync(String pairs, InfoLevel level)
+        public async Task<IList<AssetPair>> GetAssetPairsAsync(String pairs, InfoLevel level)
         {
             if (level != InfoLevel.All)
                 return await GetNoCacheAssetPairsAsync(pairs, level);
@@ -411,13 +411,110 @@ namespace Kraken
         #region non-async methods
 
         /// <summary>
+        /// Get all available assets
+        /// </summary>
+        /// <returns>A list of all assets</returns>
+        public IList<Asset> GetAssets()
+        {
+            try 
+            {
+                return GetAssetsAsync().Result;
+            }
+            catch (AggregateException ex)
+            {
+                RethrowKrakenException(ex);
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Get asset info
         /// </summary>
         /// <param name="asset">comma delimited list of assets to get info on</param>
         /// <returns>A list with the requested assets</returns>
         public IList<Asset> GetAssets(String asset)
         {
-            return GetAssetsAsync(asset).Result;
+            try
+            {
+                return GetAssetsAsync(asset).Result;
+            }
+            catch (AggregateException ex)
+            {
+                RethrowKrakenException(ex);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get all available asset pairs
+        /// </summary>
+        /// <returns>A list with all asset pairs</returns>
+        public IList<AssetPair> GetAssetPairs()
+        {
+            try
+            {
+                return GetAssetPairsAsync().Result;
+            }
+            catch (AggregateException ex)
+            {
+                RethrowKrakenException(ex);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get the requested info for all available asset pairs
+        /// </summary>
+        /// <param name="level">The InfoLevel</param>
+        /// <returns>A list with all asset pairs</returns>
+        public IList<AssetPair> GetAssetPairs(InfoLevel level)
+        {
+            try 
+            {
+                return GetAssetPairsAsync(level).Result;
+            }
+            catch (AggregateException ex)
+            {
+                RethrowKrakenException(ex);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get a list of the requested asset pairs
+        /// </summary>
+        /// <param name="pairs">A comma separated list of asset pairs (e.g. XBTEUR for Bitcoin-Euro)</param>
+        /// <returns>A list of the requested asset pairs</returns>
+        public IList<AssetPair> GetAssetPairs(String pairs)
+        {
+            try
+            {
+                return GetAssetPairsAsync(pairs).Result;
+            }
+            catch (AggregateException ex)
+            {
+                RethrowKrakenException(ex);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get the requested info for the list of requested asset pairs
+        /// </summary>
+        /// <param name="pairs">A comma separated list of asset pairs (e.g. XBTEUR for Bitcoin-Euro)</param>
+        /// <param name="level">The InfoLevel</param>
+        /// <returns>A list of the requested asset pairs</returns>
+        public IList<AssetPair> GetAssetPairs(String pairs, InfoLevel level)
+        {
+            try
+            {
+                return GetAssetPairsAsync(pairs, level).Result;
+            }
+            catch (AggregateException ex)
+            {
+                RethrowKrakenException(ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -426,7 +523,15 @@ namespace Kraken
         /// <returns>array of asset names and balance amount</returns>
         public String GetBalance()
         {
-            return GetBalanceAsync().Result;
+            try 
+            {
+                return GetBalanceAsync().Result;
+            }
+            catch (AggregateException ex)
+            {
+                RethrowKrakenException(ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -437,7 +542,15 @@ namespace Kraken
         /// <returns></returns>
         public String GetOpenOrders(Boolean includeTrades = false, String userReferenceId = null)
         {
-            return GetOpenOrdersAsync(includeTrades, userReferenceId).Result;
+            try
+            {
+                return GetOpenOrdersAsync(includeTrades, userReferenceId).Result;
+            }
+            catch (AggregateException ex)
+            {
+                RethrowKrakenException(ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -446,7 +559,15 @@ namespace Kraken
         /// <returns>The current time from the Kraken server</returns>
         public DateTime GetServerTime()
         {
-            return GetServerTimeAsync().Result;
+            try
+            {
+                return GetServerTimeAsync().Result;
+            }
+            catch (AggregateException ex)
+            {
+                RethrowKrakenException(ex);
+                throw;
+            }
         }
 
         /// <summary>
@@ -456,7 +577,15 @@ namespace Kraken
         /// <returns>The raw result from the api</returns>
         public String GetTradeBalance(String asset)
         {
-            return GetTradeBalanceAsync(asset).Result;
+            try
+            {
+                return GetTradeBalanceAsync(asset).Result;
+            }
+            catch (AggregateException ex)
+            {
+                RethrowKrakenException(ex);
+                throw;
+            }
         }
 
         #endregion non-async methods
@@ -514,6 +643,12 @@ namespace Kraken
             }
 
             return list;
+        }
+
+        private void RethrowKrakenException(AggregateException ex)
+        {
+            if (ex.InnerException.GetType() == typeof(KrakenException))
+                throw ex.InnerException;
         }
 
         #endregion private / protected
