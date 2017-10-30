@@ -33,7 +33,7 @@ namespace Kraken.Net
         {
             if (errors.Count > 0)
             {
-                var firstError = errors.Where(e => e.SeverityCode == Error.Severity.Error).FirstOrDefault();
+                var firstError = errors.FirstOrDefault(e => e.SeverityCode == Error.Severity.Error);
                 if (firstError != null)
                     return String.Concat(firstError.Category, ": ", firstError.ErrorType, " ", firstError.ExtraInfo);
             }

@@ -9,6 +9,9 @@ using Kraken.Net.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+// ReSharper disable MemberCanBePrivate.Global
+// ReSharper disable UnusedMember.Global
+
 namespace Kraken.Net
 {
     /// <summary>
@@ -24,29 +27,33 @@ namespace Kraken.Net
         /// The default Kraken API version
         /// </summary>
         public const String Version = "0";
-
-        protected const String MediaType = "application/x-www-form-urlencoded";
-
+        
+        /// <summary>
+        /// The media type for requests
+        /// </summary>
+        protected const String _mediaType = "application/x-www-form-urlencoded";
         /// <summary>
         /// The API key
         /// </summary>
-        protected String _key;
+        protected readonly String _key;
         /// <summary>
         /// The API secret
         /// </summary>
-        protected String _secret;
+        protected readonly String _secret;
         /// <summary>
         /// The URL to the API
         /// </summary>
-        protected String _url;
+        protected readonly String _url;
         /// <summary>
         /// The API version
         /// </summary>
-        protected String _version;
+        protected readonly String _version;
+        /// <summary>
+        /// The HttpMessageHandler for HttpRequests
+        /// </summary>
+        protected readonly HttpMessageHandler _clientHandler;
 
-        protected HttpMessageHandler _clientHandler;
-
-        private Cache _cache;
+        private readonly Cache _cache;
 
         #region Constructors
 
@@ -195,12 +202,12 @@ namespace Kraken.Net
 
             IList<AssetPair> assetPairs = await _cache.GetAssetPairsAsync();
 
-            if (!String.IsNullOrWhiteSpace(pairs))
-            {
-                string[] pairNames = pairs.Split(',');
+            if (String.IsNullOrWhiteSpace(pairs)) 
+                return assetPairs;
+            
+            string[] pairNames = pairs.Split(',');
                 
-                assetPairs = assetPairs.Where(a => pairNames.Contains(a.Name)).ToList();
-            }
+            assetPairs = assetPairs.Where(a => pairNames.Contains(a.Name)).ToList();
 
             return assetPairs;
         }
@@ -213,6 +220,8 @@ namespace Kraken.Net
         /// <returns>A list with the requested pairs</returns>
         internal async Task<IList<AssetPair>> GetNoCacheAssetPairsAsync(String pairs, InfoLevel level)
         {
+            // TODO: What is about the pairs parameter?
+            
             var parameters = new Dictionary<String, String>();
 
             switch (level)
@@ -244,10 +253,10 @@ namespace Kraken.Net
                 AssetPair a = JsonConvert.DeserializeObject<AssetPair>(token.First.ToString());
                 
                 if (!String.IsNullOrWhiteSpace(a.BaseAlias) && a.BaseAlias.Length > 1)
-                    a.Base = assets.Where(o => o.Name.Equals(a.BaseAlias.Substring(1))).FirstOrDefault();
+                    a.Base = assets.FirstOrDefault(o => o.Name.Equals(a.BaseAlias.Substring(1)));
 
                 if (!String.IsNullOrWhiteSpace(a.QuoteAlias) && a.QuoteAlias.Length > 1)
-                    a.Quote = assets.Where(o => o.Name.Equals(a.QuoteAlias.Substring(1))).FirstOrDefault();
+                    a.Quote = assets.FirstOrDefault(o => o.Name.Equals(a.QuoteAlias.Substring(1)));
 
                 assetPairs.Add(a);
             }
@@ -272,9 +281,8 @@ namespace Kraken.Net
         /// <returns></returns>
         public async Task<String> GetOpenOrdersAsync(Boolean includeTrades = false, String userReferenceId = null)
         {
-            var parameters = new Dictionary<String, String>();
-            parameters.Add("trades", includeTrades.ToString());
-            
+            var parameters = new Dictionary<String, String> {{"trades", includeTrades.ToString()}};
+
             if (!String.IsNullOrWhiteSpace(userReferenceId))
             {
                 parameters.Add("userref", userReferenceId);
@@ -339,7 +347,7 @@ namespace Kraken.Net
             using (var client = _clientHandler == null ?  new HttpClient() : new HttpClient(_clientHandler))
             {
                 string address = String.Format("{0}/{1}/public/{2}", _url, _version, method);
-                var content = new StringContent(postData, Encoding.UTF8, MediaType);
+                var content = new StringContent(postData, Encoding.UTF8, _mediaType);
 
                 var response = await client.PostAsync(address, content);
 
@@ -390,7 +398,7 @@ namespace Kraken.Net
                 client.DefaultRequestHeaders.Add("API-Sign", signature);
 
                 string address = String.Concat(_url, path);
-                var content = new StringContent(postData, Encoding.UTF8, MediaType);
+                var content = new StringContent(postData, Encoding.UTF8, _mediaType);
 
                 var response = await client.PostAsync(address, content);
 
