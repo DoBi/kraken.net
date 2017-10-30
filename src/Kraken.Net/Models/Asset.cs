@@ -1,8 +1,7 @@
 using System;
-
 using Newtonsoft.Json;
 
-namespace Kraken.Models
+namespace Kraken.Net.Models
 {
     /// <summary>
     /// A asset from the Kraken API

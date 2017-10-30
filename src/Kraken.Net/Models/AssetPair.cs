@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-
 using Newtonsoft.Json;
 
-namespace Kraken.Models
+namespace Kraken.Net.Models
 {
     public class AssetPair
     {

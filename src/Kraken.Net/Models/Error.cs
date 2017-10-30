@@ -1,6 +1,6 @@
 using System;
 
-namespace Kraken.Models
+namespace Kraken.Net.Models
 {
     /// <summary>
     /// An error from the Kraken API

@@ -6,7 +6,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Kraken.Tests
+namespace Kraken.Net.Tests
 {
     public class KrakenApiResponseHandler : DelegatingHandler
     {

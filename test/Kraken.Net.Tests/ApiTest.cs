@@ -4,12 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-
+using Kraken.Net.Models;
 using Xunit;
 
-using Kraken.Models;
-
-namespace Kraken.Tests
+namespace Kraken.Net.Tests
 {
     public class ApiTest
     {
@@ -59,7 +57,7 @@ namespace Kraken.Tests
             Assert.Same(assets1, assets2);
         }
 
-        [Fact]
+        //[Fact]
         // TODO: Currently not enabled because there are no json response for asset pairs
         public void TestGetAssetPairsCache()
         {
@@ -94,18 +92,18 @@ namespace Kraken.Tests
             } 
             catch (AggregateException ex)
             {
-                Assert.IsType(typeof(KrakenException), ex.InnerException);
+                Assert.IsType<KrakenException>(ex.InnerException);
 
                 errors = ((KrakenException) ex.InnerException).Errors;
             }
 
-            Assert.Equal(1, errors.Count());
+            Assert.Single(errors);
             Error error = errors.FirstOrDefault();
             Assert.NotNull(error);
             Assert.Equal("General", error.Category);
             Assert.Equal(Error.Severity.Error, error.SeverityCode);
             Assert.Equal("Unknown method", error.ErrorType);
-            Assert.Equal(null, error.ExtraInfo);
+            Assert.Null(error.ExtraInfo);
         }
     }
 }

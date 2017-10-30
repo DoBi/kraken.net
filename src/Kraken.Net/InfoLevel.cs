@@ -1,4 +1,4 @@
-namespace Kraken
+namespace Kraken.Net
 {
     public enum InfoLevel
     {

@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Kraken.Net.Models;
 
-using Kraken.Models;
-
-namespace Kraken
+namespace Kraken.Net
 {
     /// <summary>
     /// An internal cache class for caching some not necessarily important objects

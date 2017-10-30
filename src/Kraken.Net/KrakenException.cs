@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Kraken.Net.Models;
 
-using Kraken.Models;
-
-namespace Kraken
+namespace Kraken.Net
 {
     /// <summary>
     /// An exception with occurs if there is a problem with the Kraken API

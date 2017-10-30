@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Copyright>Copyright (c) 2017, Dominik Bittner</Copyright>
+    <VersionPrefix>0.0.1</VersionPrefix>
+    <Authors>Dominik Bittner</Authors>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <DebugType>portable</DebugType>
+    <AssemblyName>Kraken.Net</AssemblyName>
+    <PackageId>Kraken.Net</PackageId>
+    <PackageLicenseUrl>https://github.com/DoBi/kraken.net/blob/master/LICENSE</PackageLicenseUrl>
+    <RuntimeFrameworkVersion>2.0.0</RuntimeFrameworkVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+  </ItemGroup>
+</Project>

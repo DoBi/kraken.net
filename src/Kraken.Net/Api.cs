@@ -5,13 +5,11 @@ using System.Net.Http;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-
+using Kraken.Net.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-using Kraken.Models;
-
-namespace Kraken
+namespace Kraken.Net
 {
     /// <summary>
     /// Class for interaction with the Kraken API

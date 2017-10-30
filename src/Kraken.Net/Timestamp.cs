@@ -1,6 +1,6 @@
 using System;
 
-namespace Kraken
+namespace Kraken.Net
 {
     /// <summary>
     /// A timestamp helper class
